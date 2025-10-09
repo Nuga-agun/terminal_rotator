@@ -2,10 +2,12 @@
 #include <unistd.h>
 #include <math.h>
 
-#define GRID_SIZE 20
+#define GRID_SIZE 50
 #define EMPTY_CHAR ' '
-#define LEN_INPUT 10
-#define REFRESH_DELAY 1000000
+#define LEN_INPUT GRID_SIZE/2 
+#define REFRESH_DELAY 100000
+#define ROTATION_PER_SECOND 0.5
+#define ANGLE (2*M_PI * ROTATION_PER_SECOND * REFRESH_DELAY/1000000)
 
 struct point{
 	float x;
@@ -65,8 +67,8 @@ int main(int argc, char *argv[]) {
 		for (int index=0; index<LEN_INPUT; index++) {
 			float old_x = message_points[index].x;
 			float old_y = message_points[index].y;
-			message_points[index].x = old_x * cos(M_PI/6) - old_y * sin(M_PI/6);
-			message_points[index].y = old_x * sin(M_PI/6) + old_y * cos(M_PI/6);
+			message_points[index].x = old_x * cos(ANGLE) - old_y * sin(ANGLE);
+			message_points[index].y = old_x * sin(ANGLE) + old_y * cos(ANGLE);
 			if (write_in_grid(message_points[index], grid) != 0) {
 				return 1;
 			}
