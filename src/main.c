@@ -1,12 +1,13 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
 #include <string.h>
 
 #define GRID_SIZE 50
 #define EMPTY_CHAR ' '
-#define REFRESH_DELAY 1000000
-#define ROTATION_PER_SECOND 0.25
+#define REFRESH_DELAY 200000
+#define ROTATION_PER_SECOND 0.75
 #define ANGLE (2*M_PI * ROTATION_PER_SECOND * REFRESH_DELAY/1000000)
 
 struct point{
@@ -16,10 +17,10 @@ struct point{
 };
 
 void clear_screen() {
-	printf("\033[2J\033[1;1H");
+	system("clear");
 }
 
-void draw_grid(char grid[GRID_SIZE][GRID_SIZE]) {
+void draw_grid(const char grid[GRID_SIZE][GRID_SIZE]) {
 	for (int i=0; i<GRID_SIZE; i++) {
 		for (int j=0; j<GRID_SIZE; j++) {
 			printf("%c", grid[i][j]);
@@ -36,7 +37,7 @@ void init_grid(char grid[GRID_SIZE][GRID_SIZE]) {
 	}
 }
 
-void write_in_grid(struct point p, char grid[GRID_SIZE][GRID_SIZE]) {
+void write_in_grid(const struct point p, char grid[GRID_SIZE][GRID_SIZE]) {
 	float i = p.y + GRID_SIZE/2;
 	float j = p.x + GRID_SIZE/2;
 	if (i>=0 && i<GRID_SIZE && j>=0 && j<GRID_SIZE) {
@@ -44,30 +45,36 @@ void write_in_grid(struct point p, char grid[GRID_SIZE][GRID_SIZE]) {
 	}
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* restrict argv[]) {
 	if (argc != 2) {
 		printf("Usage : rotator MESSAGE");
 		return 1;
 	}
 	int len_input = strlen(argv[1]);
+	if (len_input >= GRID_SIZE) {
+		printf("Message is too long to be displayed");
+	}
+
 	char grid[GRID_SIZE][GRID_SIZE];
-	struct point message_points[strlen(argv[1])];
-	for (int index=0; index<len_input; index++) {
-		message_points[index].x = index;
-		message_points[index].y = 0;
-		message_points[index].letter = argv[1][index];
+	struct point message_points[len_input];
+	for (int msg_index=0; msg_index<len_input; msg_index++) {
+		message_points[msg_index].x = msg_index;
+		message_points[msg_index].y = 0;
+		message_points[msg_index].letter = argv[1][msg_index];
 	}
 
 	while (1) {
 		clear_screen();
 		init_grid(grid);
 
-		for (int index=0; index<len_input; index++) {
-			float old_x = message_points[index].x;
-			float old_y = message_points[index].y;
-			message_points[index].x = old_x * cos(ANGLE) - old_y * sin(ANGLE);
-			message_points[index].y = old_x * sin(ANGLE) + old_y * cos(ANGLE);
-			write_in_grid(message_points[index], grid);
+		float cos_angle = cos(ANGLE);
+		float sin_angle = sin(ANGLE);
+		for (int msg_index=0; msg_index<len_input; msg_index++) {
+			float old_x = message_points[msg_index].x;
+			float old_y = message_points[msg_index].y;
+			message_points[msg_index].x = old_x * cos_angle - old_y * sin_angle;
+			message_points[msg_index].y = old_x * sin_angle + old_y * cos_angle;
+			write_in_grid(message_points[msg_index], grid);
 		}
 
 		draw_grid(grid);
@@ -76,3 +83,5 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
+
+
